@@ -3,6 +3,9 @@ import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
 import { greet } from "@repo/utils/messages";
 
+// import { prisma } from "@repo/db/client";
+import { prisma } from "../../../packages/db/src/client";
+
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
   srcDark: string;
@@ -19,10 +22,35 @@ const ThemeImage = (props: Props) => {
   );
 };
 
+// TEMPORARY:
+
+async function getUsers() {
+  const users = await prisma.user.findMany();
+  console.log(users);
+  return users;
+}
+
+type User = {
+  id: string;
+  email: string;
+}
+
+const dbUsers = await getUsers();
+
+// END TEMPORARY
+
+// {users}: {users: Promise<User[]>}
 export default function Home() {
   return (
     <div className={styles.page}>
       {greet("World")}
+      {dbUsers.map((user: any) => (
+        <div key={user.id}>
+          <p>
+            {user.id} - {user.email}
+          </p>
+        </div>
+      ))}
       <main className={styles.main}>
         <ThemeImage
           className={styles.logo}
