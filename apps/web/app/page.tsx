@@ -2,38 +2,47 @@ import Image, { type ImageProps } from "next/image";
 import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
 import { greet } from "@repo/utils/messages";
-
-
-// TEMPORARY:
-
-// import { prisma } from "@repo/db/client";
-import { prisma } from "../../../packages/db/src/client";
 import { AppLayout } from "../components/layout/appLayout";
+import { ProductList } from "../components/products/productList";
 
-async function getUsers() {
-  const users = await prisma.user.findMany();
-  console.log(users);
-  return users;
-}
+export default async function Home() {
+  try {
+    // Use absolute URL with environment-specific base URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    
+    // Fetch products from the API
+    const response = await fetch(`${baseUrl}/api/products`, {
+      cache: 'no-store', // Disable caching to always get fresh data
+      // Or use: next: { revalidate: 60 } // Revalidate every 60 seconds
+    });
+    
+    // Check if the response is ok
+    if (!response.ok) {
+      throw new Error(`Failed to fetch products: ${response.status}`);
+    }
+    
+    // Parse the JSON response
+    const products = await response.json();
 
-type User = {
-  id: string;
-  email: string;
-}
-
-const dbUsers = await getUsers();
-
-// END TEMPORARY
-
-// {users}: {users: Promise<User[]>}
-export default function Home() {
-  return (
-    <AppLayout>
-      { dbUsers.map((user) => (
-        <div key={user.id} className={styles.userCard}>
-          <p>{user.email} - {user.id}</p>
+    return (
+      <AppLayout>
+        <div className={styles.container}>
+          <h1 className={styles.title}>Our Products</h1>
+          <ProductList products={products} />
         </div>
-      ))}
-    </AppLayout>
-  );
+      </AppLayout>
+    );
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    
+    // Return fallback UI
+    return (
+      <AppLayout>
+        <div className={styles.container}>
+          <h1 className={styles.title}>Our Products</h1>
+          <p>Sorry, we couldn't load the products. Please try again later.</p>
+        </div>
+      </AppLayout>
+    );
+  }
 }
