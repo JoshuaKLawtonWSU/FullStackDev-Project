@@ -11,15 +11,16 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/db": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@tailwindcss/postcss": "^4.1.8",
+    "bcryptjs": "^3.0.2",
     "next": "^15.3.0",
     "postcss": "^8.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwindcss": "^4.1.8",
-    "@repo/utils": "workspace:*",
-    "@repo/db": "workspace:*"
+    "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

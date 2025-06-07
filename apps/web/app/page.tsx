@@ -33,9 +33,7 @@ export default function Home() {
         <div key={user.id} className={styles.userCard}>
           <p>{user.email} - {user.id}</p>
         </div>
-      ))
-
-      }
+      ))}
     </AppLayout>
   );
 }
