@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     });
     
     if (existingUser) {
+        console.log('User already exists:', email);
         return new Response(
             JSON.stringify({
                 error: 'User with this email already exists'
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
         password: hashedPassword
       }
     });
+    console.log('User created:', user.email);
 
     // Return success without exposing the password
     return new Response(
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
     );
     
   } catch (error) {
+    console.log('Registration error:', error);
     console.error('Registration error:', error);
     // return new Response(
     //   { error: 'Registration failed' },
@@ -58,7 +61,7 @@ export async function POST(req: Request) {
     return new Response(
         JSON.stringify({
             error: 'Registration failed'
-        }), 
+        }),
         {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
