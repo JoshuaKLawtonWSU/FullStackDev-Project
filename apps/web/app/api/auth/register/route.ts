@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 // import { z } from 'zod';
 import { prisma } from "../../../../../../packages/db/src/client";
+import sign from 'jsonwebtoken';
 
 
 // Define validation schema for registration data
@@ -42,9 +43,32 @@ export async function POST(req: Request) {
     });
     console.log('User created:', user.email);
 
+    const returnedUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+      }
+    });
+
+    if (!returnedUser) {
+      console.error('User not found after creation');
+      return new Response(
+        JSON.stringify({ error: 'User not found after creation' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    
+
     // Return success without exposing the password
     return new Response(
-        JSON.stringify(user),
+        JSON.stringify(
+          user,
+        ),
         {
             status: 201,
             headers: { 'Content-Type': 'application/json' }
@@ -52,6 +76,8 @@ export async function POST(req: Request) {
     );
     
   } catch (error) {
+    console.log('Registration error:', error);
+    console.log('Registration error:', error);
     console.log('Registration error:', error);
     console.error('Registration error:', error);
     // return new Response(
