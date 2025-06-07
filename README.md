@@ -1,84 +1,239 @@
-# Turborepo starter
+# FullStack Development Project
 
-This Turborepo starter is maintained by the Turborepo core team.
+This is a monorepo-based full-stack e-commerce application built with Next.js, Prisma, and TypeScript.
 
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## Project Structure
 
 ```
-cd my-turborepo
-pnpm build
+apps/
+  ├── admin/     # Admin dashboard for managing the store
+  └── web/       # Customer-facing e-commerce website
+packages/
+  ├── db/        # Prisma database client and schema
+  ├── ui/        # Shared UI components
+  ├── utils/     # Shared utility functions
+  └── eslint-config/ # Shared ESLint configuration
 ```
 
-### Develop
+## Getting Started
 
-To develop all apps and packages, run the following command:
+### Prerequisites
 
+- Node.js 18+ 
+- pnpm (recommended) or npm
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd FullStackDev-Project
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Set up environment variables:
+   Create `.env` file within packages/db with link to your Database URL.
+
+4. Generate Prisma client:
+   ```bash
+   cd packages/db
+   pnpm prisma generate
+   pnpm prisma db push
+   ```
+
+### Development
+
+Start all applications in development mode:
+
+```bash
+turbo dev
 ```
-cd my-turborepo
-pnpm dev
-```
 
-### Remote Caching
+The admin dashboard will be available at [http://localhost:3011](http://localhost:3011).
+The web store will be available at [http://localhost:3010](http://localhost:3010).
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## API Reference
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+### Admin APIs
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+#### Categories API
 
-```
-cd my-turborepo
-npx turbo login
-```
+**Endpoint**: `/api/categories`
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+- `GET /api/categories`
+  - Returns all categories
+  - Response: Array of category objects
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+- `POST /api/categories`
+  - Creates a new category
+  - Request body:
+    ```json
+    {
+      "name": "Category Name",
+      "slug": "category-slug",
+      "description": "Optional description"
+    }
+    ```
+  - Validation:
+    - Name must be at least 2 characters
+    - Slug must be at least 2 characters and contain only lowercase letters, numbers, and hyphens
+  - Response: Created category object
 
-```
-npx turbo link
-```
+#### Products API
 
-## Useful Links
+**Endpoint**: `/api/products`
 
-Learn more about the power of Turborepo:
+- `GET /api/products`
+  - Returns all products with related category information
+  - Products are ordered by name (ascending)
+  - Response: Array of product objects with category details
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- `POST /api/products`
+  - Creates a new product
+  - Request body:
+    ```json
+    {
+      "name": "Product Name",
+      "slug": "product-slug",
+      "description": "Product description",
+      "price": 99.99,
+      "inventory": 100,
+      "categoryId": "category-uuid"
+    }
+    ```
+  - Validation:
+    - Required fields: name, slug, description, price, inventory, categoryId
+    - Price must be a positive number
+    - Inventory must be a positive integer
+    - Category must exist
+    - Slug must be unique
+  - Response: Created product object with category details
+
+- `DELETE /api/products`
+  - Deletes a product
+  - Request must include product ID or slug
+
+**Endpoint**: `/api/products/edit/[slug]`
+
+- `GET /api/products/edit/[slug]`
+  - Returns a specific product by slug
+  - Response: Product object with images
+
+- `POST /api/products/edit/[slug]`
+  - Updates an existing product
+  - Request body:
+    ```json
+    {
+      "name": "Updated Product Name",
+      "description": "Updated description",
+      "price": 129.99,
+      "inventory": 50,
+      "categoryId": "category-uuid",
+      "isActive": true,
+      "newSlug": "new-product-slug" // Optional
+    }
+    ```
+  - Required fields: name, price
+  - Response: Updated product object with category details
+
+#### Users API
+
+**Endpoint**: `/api/users`
+
+- `GET /api/users`
+  - Returns all users
+  - Response: Array of user objects
+
+**Endpoint**: `/api/users/edit/[id]`
+
+- `GET /api/users/edit/[id]`
+  - Returns a specific user by ID
+  - Response: User object
+
+- `POST /api/users/edit/[id]`
+  - Updates an existing user
+  - Response: Updated user object
+
+### Web Store APIs
+
+#### Authentication API
+
+**Endpoint**: `/api/auth/login`
+
+- `POST /api/auth/login`
+  - Authenticates a user
+  - Response: User session data
+
+**Endpoint**: `/api/auth/register`
+
+- `POST /api/auth/register`
+  - Registers a new user
+  - Response: Created user object
+
+#### Products API (Frontend)
+
+**Endpoint**: `/api/products`
+
+- `GET /api/products`
+  - Returns all active products
+  - Products are ordered by creation date (newest first)
+  - Response: Array of product objects
+
+#### Categories API (Frontend)
+
+**Endpoint**: `/api/categories`
+
+- `GET /api/categories`
+  - Returns all active categories
+  - Response: Array of category objects
+
+### Database Schema
+
+Key models include:
+
+- `User`: Customer accounts
+- `Category`: Product categories with hierarchical structure
+- `Product`: Store products with inventory tracking
+- `Order`: Customer orders with items and payment information
+
+## Architecture Decisions
+
+### Monorepo Structure
+
+This project uses a Turborepo monorepo structure to:
+- Share code between applications
+- Maintain consistent tooling
+- Enable parallel and incremental builds
+- Simplify dependency management
+
+### Technology Choices
+
+- **Next.js**: Provides server-side rendering, API routes, and optimized builds
+- **Prisma**: Type-safe database access with migrations and schema management
+- **TypeScript**: Adds static typing for improved developer experience and code quality
+- **pnpm**: Efficient package management with workspace support
+
+### Database Design
+
+The database is designed with:
+- Normalized structure to minimize data duplication
+- Proper relationship modeling (one-to-many, many-to-many)
+- Support for hierarchical categories
+- Soft deletion for important entities
+
+## Deployment
+
+The application is configured for deployment on Vercel:
+
+1. Connect your Vercel account to your repository
+2. Set up the necessary environment variables
+3. Deploy both apps individually or use Vercel's monorepo support
+
+## License
+
+MIT
